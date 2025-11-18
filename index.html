@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rutas de Laboratorio: Enfermeros Motorizados</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        // Configuración de Tailwind para colores personalizados y sombras
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4f46e5', // Índigo
+                        'secondary': '#f97316', // Naranja
+                        'card-bg': '#ffffff',
+                        'body-bg': '#f3f4f6', 
+                    },
+                    boxShadow: {
+                        'custom': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 10px rgba(79, 70, 229, 0.1)'
+                    },
+                    backgroundImage: {
+                        'moto-pattern': "url('moto2.png')" 
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="p-2 md:p-6 bg-body-bg min-h-screen bg-moto-pattern bg-blend-lighten bg-opacity-10">
+
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+        <p class="mt-4 text-primary font-semibold text-lg">Procesando datos...</p>
+    </div>
+    
+    <div id="custom-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-[1020] transition-opacity duration-300">
+        </div>
+
+    <div id="message-box" class="msg-info">Mensaje de prueba</div>
+
+    <div class="max-w-7xl mx-auto bg-card-bg rounded-xl shadow-2xl p-4 md:p-8">
+        
+        <header class="mb-6 border-b pb-4">
+            <h1 class="text-3xl font-extrabold text-primary mb-1 flex items-center">
+                <img src="moto.png" onerror="this.src='https://placehold.co/40x40/4f46e5/ffffff?text=M'" alt="Motorcycle Icon" class="h-10 w-10 mr-3">
+                Rutas de Laboratorio (Enfermeros Motorizados)
+            </h1>
+            <p class="text-gray-500">Organización y optimización de visitas a pacientes según la hora de inicio de ruta.</p>
+        </header>
+
+        <div class="flex flex-col gap-4 mb-6">
+            
+            <div class="flex items-center space-x-4 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                <label for="start-time" class="text-indigo-700 font-semibold min-w-[120px]">Hora de Inicio de Ruta:</label>
+                <input type="time" id="start-time" class="p-2 border border-indigo-300 rounded-lg shadow-sm text-lg font-medium focus:ring-primary focus:border-primary transition duration-150" value="05:00">
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                
+                <input type="file" id="file-upload" accept=".csv" class="hidden">
+
+                <button id="load-file-btn" class="file-action-btn bg-gradient-to-r from-primary to-indigo-400 hover:from-indigo-500 hover:to-indigo-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span>Cargar CSV</span>
+                </button>
+                
+                <button id="export-pdf-btn" class="file-action-btn bg-gradient-to-r from-secondary to-orange-400 hover:from-orange-500 hover:to-orange-600 disabled:opacity-50" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h4m-4 0h4m-4 0v-4m4 4v-4m-4-4h4m-4 0h4m-4 0v-4m4 4v-4m-4-4h4m-4 0h4m-4 0v-4m4 4v-4m-4-4h4m-4 0h4m-4 0v-4" />
+                    </svg>
+                    <span>Exportar PDF</span>
+                </button>
+
+                <button id="clear-data-btn" class="action-btn text-gray-700 bg-white hover:bg-gray-100 border-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span>Limpiar Datos</span>
+                </button>
+                
+                <button id="portal-link-btn" class="action-btn text-white bg-indigo-600 hover:bg-indigo-700 border-indigo-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span>Volver al Portal</span>
+                </button>
+                </div>
+        </div>
+
+        <div class="overflow-x-auto shadow-custom rounded-lg bg-card-bg">
+            <table id="route-table" class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-12">#</th>
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[70px]">Orden Manual</th>
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hora Estimada</th>
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px]">Dirección / Tipo Cliente</th>
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">Paciente / N° Solicitud</th>
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">Observaciones</th>
+                        <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="route-table-body" class="bg-white divide-y divide-gray-200" data-drag-container>
+                    <tr>
+                        <td colspan="7" class="p-6 text-center text-gray-500">
+                            Cargue un archivo CSV para empezar a organizar la ruta.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+    
+    <a id="lupap-link" href="#" target="_blank" 
+       class="floating-map-link bg-blue-600 hover:bg-blue-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13l-4 4-4-4m18-6l-4-4-4 4M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        <span class="ml-2">Ruta en Lupap</span>
+    </a>
+
+    <a id="google-maps-link" href="#" target="_blank" 
+       class="floating-map-link bg-red-600 hover:bg-red-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span class="ml-2">Ruta en Google Maps</span>
+    </a>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

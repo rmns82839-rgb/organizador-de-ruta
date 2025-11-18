@@ -1,0 +1,214 @@
+/* Estilos generales */
+body {
+    font-family: 'Inter', sans-serif;
+    /* Las variables de color se definen en el script de Tailwind en index.html */
+    background-color: #f3f4f6; 
+    background-attachment: fixed; 
+    background-size: cover;
+}
+
+/* Clases para botones de acción (Más grandes y elegantes) */
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    padding: 0.75rem 1.25rem; 
+    font-size: 0.875rem; 
+    font-weight: 600; 
+    border-radius: 0.5rem; 
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+    border: 1px solid transparent;
+    /* Ajuste para móvil */
+    min-width: 120px; 
+    white-space: nowrap; /* Evita que el texto del botón se rompa */
+}
+
+/* Estilo para los botones de Importar/Exportar CSV (Elegante con Degradado) */
+.file-action-btn {
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 6px 12px -3px rgba(0, 0, 0, 0.2);
+    padding: 0.75rem 1.5rem;
+}
+
+/* Estilos para el texto de la tabla, mejora la legibilidad */
+#route-table td, #route-table th {
+    padding: 0.5rem 0.75rem;
+}
+
+/* Estilos para botones de acción dentro de la tabla */
+.table-action-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 0.375rem;
+    line-height: 1;
+}
+
+/* --- Resaltado de Filas (Orden Manual) --- */
+/* NOTA: El estado 0 es sin clase (fondo blanco/gris por defecto) */
+.highlight-manual-yellow {
+    background-color: #fef9c3; /* yellow-100 */
+    color: #78350f; /* Amber-900 para contraste */
+    box-shadow: 0 0 0 1px #fef08a inset; /* yellow-200 */
+}
+.highlight-manual-blue {
+    background-color: #eff6ff; /* blue-100 */
+    color: #1e3a8a; /* Blue-900 para contraste */
+    box-shadow: 0 0 0 1px #bfdbfe inset; /* blue-300 */
+}
+.highlight-manual-pink {
+    background-color: #fce7f6; /* pink-100 */
+    color: #831843; /* Pink-900 para contraste */
+    box-shadow: 0 0 0 1px #fbcfe8 inset; /* pink-200 */
+}
+.highlight-manual-green {
+    background-color: #d1fae5; /* green-100 */
+    color: #064e3b; /* Teal-900 para contraste */
+    box-shadow: 0 0 0 1px #a7f3d0 inset; /* green-200 */
+}
+
+/* --- Resaltado de Celdas (Compañía, N° Solicitud, Observaciones) --- */
+.cell-highlight-yellow {
+    background-color: #fef08a; /* yellow-300 */
+    font-weight: 600;
+}
+.cell-highlight-red {
+    background-color: #fca5a5; /* red-300 */
+    font-weight: 600;
+}
+.cell-highlight-green {
+    background-color: #6ee7b7; /* green-300 */
+    font-weight: 600;
+}
+/* Nuevo Resaltado Azul para FSFB (Compañía) */
+.cell-highlight-blue {
+    background-color: #93c5fd; /* blue-300 */
+    font-weight: 600;
+}
+
+/* --- Estilos para Drag & Drop --- */
+.draggable-row {
+    cursor: grab;
+}
+.draggable-row:active {
+    cursor: grabbing;
+}
+/* Estilo para la fila que se está arrastrando */
+.dragging {
+    opacity: 0.4;
+    border: 2px dashed #4f46e5;
+}
+/* Estilo para indicar dónde se soltará la fila */
+.drop-zone-above {
+    border-top: 3px solid #4f46e5;
+}
+.drop-zone-below {
+    border-bottom: 3px solid #4f46e5;
+}
+/* --- Fin Estilos Drag & Drop --- */
+
+/* Overlay de Carga */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: opacity 0.3s; 
+}
+#loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: #4f46e5; /* Usar primary-color */
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mensaje flotante */
+#message-box {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1010;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.3s, transform 0.3s;
+    transform: translateY(-100%);
+    opacity: 0;
+}
+#message-box.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+.msg-success { background-color: #d1fae5; color: #064e3b; }
+.msg-error { background-color: #fee2e2; color: #991b1b; }
+.msg-info { background-color: #e0f2fe; color: #075985; }
+.msg-warning { background-color: #fef9c3; color: #854d0e; }
+
+/* Estilos para enlaces de mapas flotantes (MEJORA DE VISIBILIDAD) */
+.floating-map-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem; /* Aumentar el padding para que sea más grande */
+    border-radius: 9999px; /* full rounded */
+    color: white;
+    font-weight: 700; /* Más grueso */
+    /* Aumentar la sombra para destacarlos más */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    transform: scale(0);
+    opacity: 0;
+    /* CAMBIO: position: fixed para que se queden al hacer scroll y estén sobre todo */
+    position: fixed; 
+    bottom: 2rem; /* Más arriba */
+    right: 2rem;
+    z-index: 50;
+}
+.floating-map-link:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 20px -5px rgba(0, 0, 0, 0.4);
+}
+.floating-map-link.show {
+    transform: scale(1);
+    opacity: 1;
+}
+#lupap-link {
+    right: 12rem; /* Separación del otro botón (Ajustado) */
+}
+
+/* Estilos específicos para la celda de dirección combinada en móvil */
+@media (max-width: 768px) {
+    .table-action-btn span {
+        display: none; /* Oculta el texto de los botones de acción en móvil */
+    }
+    .table-action-btn {
+        padding: 0.25rem; /* Reduce el padding */
+    }
+    #lupap-link {
+        right: 4rem; /* Ajuste para móvil para que no se superpongan */
+        bottom: 1rem;
+    }
+    .floating-map-link {
+        bottom: 1rem;
+        right: 1rem;
+    }
+}
