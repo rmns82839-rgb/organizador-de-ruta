@@ -39,10 +39,7 @@ const CELL_HIGHLIGHT_CLASSES = {
     'blue': 'cell-highlight-blue', // Color azul para FSFB
 };
 
-// ======================================
-// CAMBIO 1: Colores de Resaltado de Fila más Oscuros para PDF
-// (Para imprimir los colores de resaltado manual en el PDF)
-// ======================================
+// Colores de Resaltado de Fila más Oscuros para PDF
 const PDF_HIGHLIGHT_COLORS = {
     0: [255, 255, 255], // Blanco para el estado 0
     1: [253, 224, 71],  // Amarillo (yellow-300: #fde047)
@@ -69,10 +66,7 @@ const DOM = {
     startTimeInput: document.getElementById('start-time'),
     loadingOverlay: document.getElementById('loading-overlay'),
     messageBox: document.getElementById('message-box'),
-    googleMapsLink: document.getElementById('google-maps-link'),
-    lupapLink: document.getElementById('lupap-link'),
     customModal: document.getElementById('custom-modal'),
-    // INCLUSIÓN: Referencia al botón del portal
     portalLinkBtn: document.getElementById('portal-link-btn')
 };
 
@@ -122,7 +116,6 @@ function saveRouteToLocalStorage() {
     } catch (error) {
         console.error('Error al guardar en Local Storage:', error);
     }
-    updateMapLinks();
 }
 
 /**
@@ -145,12 +138,8 @@ function loadRouteFromLocalStorage() {
                 item.manualOrder = Number(item.manualOrder || 0);
             });
 
-            // ======================================
-            // CAMBIO 2: CORRECCIÓN FSFB - Usar .trim() al cargar
-            // (Asegura el resaltado azul si es FSFB al cargar desde el Local Storage)
-            // ======================================
+            // CORRECCIÓN FSFB - Usar .trim() al cargar
             routeData.forEach(item => {
-                // Se asegura de eliminar espacios en el campo del CSV y poner en mayúsculas
                 const isFSFB = (item[COMPANIA_FIELD] || '').trim().toUpperCase().includes('FSFB');
                 item.cellHighlightTipo = isFSFB ? 'blue' : item.cellHighlightTipo;
             });
@@ -297,12 +286,8 @@ async function updateData(rowIndex, field, value, redraw = true) {
 function toggleCellHighlight(rowIndex, field) {
     const row = routeData[rowIndex];
     
-    // ======================================
-    // CAMBIO 3: CORRECCIÓN FSFB - Usar .trim() al verificar
-    // (Bloquea el toggle manual si la compañía es FSFB)
-    // ======================================
+    // Bloquea el toggle manual si la compañía es FSFB
     if (field === 'cellHighlightTipo' && (row[COMPANIA_FIELD] || '').trim().toUpperCase().includes('FSFB')) {
-        // La compañía FSFB es de resaltado automático (azul), no permitir toggle manual.
         showMessage('El resaltado de la compañía FSFB es automático (Azul).', 'warning');
         return;
     }
@@ -381,22 +366,17 @@ function renderRouteTable() {
             </tr>
         `;
         DOM.exportPdfBtn.disabled = true;
-        DOM.googleMapsLink.classList.remove('show');
-        DOM.lupapLink.classList.remove('show');
         return;
     }
 
     routeData.forEach((row, i) => {
-        // Si manualHighlight es 0, no aplicará ninguna clase de HIGHLIGHT_CLASSES
         const highlightClass = HIGHLIGHT_CLASSES[row.manualHighlight] || 'bg-white hover:bg-gray-50';
         
         const rowElement = document.createElement('tr');
-        // Drag & Drop: Habilitar arrastre y guardar el índice
         rowElement.className = `${highlightClass} draggable-row transition duration-150 ease-in-out`;
         rowElement.setAttribute('draggable', 'true');
-        rowElement.dataset.index = i; // Índice del paciente en el array ordenado actual
+        rowElement.dataset.index = i; 
         
-        // Adjuntar eventos de Drag & Drop a la fila
         rowElement.addEventListener('dragstart', handleDragStart);
         rowElement.addEventListener('dragover', handleDragOver);
         rowElement.addEventListener('dragleave', handleDragLeave);
@@ -406,7 +386,7 @@ function renderRouteTable() {
         // 1. Celda # Secuencia
         const sequenceCell = document.createElement('td');
         sequenceCell.className = 'px-2 py-2 border-b border-gray-200 text-sm text-center font-bold text-primary';
-        sequenceCell.textContent = row.numSecuencia; // Ya viene recalculado y ordenado
+        sequenceCell.textContent = row.numSecuencia; 
         rowElement.appendChild(sequenceCell);
 
         // 2. Celda N° Orden Manual (Editable)
@@ -431,18 +411,45 @@ function renderRouteTable() {
         `;
         rowElement.appendChild(timeCell);
         
-        // 4. Celda Dirección / Tipo Cliente (Combinada)
+        // 4. Celda Dirección / Tipo Cliente (Combinada) - AHORA CON BOTONES DE MAPA
         const addressCell = document.createElement('td');
         const tipoHighlightClass = getCellHighlightClass(row.cellHighlightTipo);
         addressCell.className = 'px-2 py-2 border-b border-gray-200 text-sm whitespace-normal max-w-xs';
         
+        // Obtener la dirección para los enlaces individuales
+        const rawAddress = row[RAW_ADDRESS_FIELD].replace(/[\n\r]+/g, ' ').trim();
+        const encodedAddress = encodeURIComponent(rawAddress);
+        
+        // Enlaces de mapa individuales para esta parada
+        const googleMapsHref = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+        const lupapMapsHref = `https://www.lupap.com.co/home/mapa-ruta?direccion=${encodedAddress.replace(/%20/g, '+')}`; 
+
         addressCell.innerHTML = `
             <div class="flex flex-col">
-                <span class="font-medium text-gray-900">${row[RAW_ADDRESS_FIELD]}</span>
-                <button onclick="toggleCellHighlight(${i}, 'cellHighlightTipo')" 
-                        class="mt-1 flex items-center justify-start text-xs font-semibold py-1 px-2 rounded-full transition duration-150 ease-in-out w-fit ${tipoHighlightClass} text-gray-700 bg-gray-200 hover:bg-gray-300">
-                    <span class="truncate">${row[COMPANIA_FIELD]}</span>
-                </button>
+                <span class="font-medium text-gray-900">${rawAddress}</span>
+                
+                <div class="flex flex-wrap items-center mt-1">
+                    <button onclick="toggleCellHighlight(${i}, 'cellHighlightTipo')" 
+                            class="flex items-center justify-start text-xs font-semibold py-1 px-2 rounded-full transition duration-150 ease-in-out w-fit mr-2 ${tipoHighlightClass} text-gray-700 bg-gray-200 hover:bg-gray-300">
+                        <span class="truncate">${row[COMPANIA_FIELD]}</span>
+                    </button>
+                    
+                    <a href="${googleMapsHref}" target="_blank" 
+                       class="table-action-btn bg-red-600 hover:bg-red-700 text-white" title="Abrir en Google Maps">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Mapp</span>
+                    </a>
+                    <a href="${lupapMapsHref}" target="_blank" 
+                       class="table-action-btn bg-blue-600 hover:bg-blue-700 text-white ml-1" title="Abrir en Lupap">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13l-4 4-4-4m18-6l-4-4-4 4M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        <span>Lupap</span>
+                    </a>
+                </div>
             </div>
         `;
         rowElement.appendChild(addressCell);
@@ -498,31 +505,31 @@ function renderRouteTable() {
         `;
         rowElement.appendChild(notesCell);
 
-        // 7. Celda Acciones
+        // 7. Celda Acciones - AHORA SOLO CON RESALTAR Y ELIMINAR
         const actionCell = document.createElement('td');
         actionCell.className = 'px-2 py-2 border-b border-gray-200 text-center text-sm whitespace-nowrap';
+
         actionCell.innerHTML = `
-            <button onclick="toggleHighlight(${i})" 
-                    class="table-action-btn bg-indigo-500 hover:bg-indigo-600 text-white mr-1 mb-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Resaltar</span>
-            </button>
-            <button onclick="deleteRow(${i})" class="table-action-btn bg-red-500 hover:bg-red-600 text-white mr-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                <span>Eliminar</span>
-            </button>
+            <div class="flex flex-wrap justify-center gap-1">
+                <button onclick="toggleHighlight(${i})" 
+                        class="table-action-btn bg-indigo-500 hover:bg-indigo-600 text-white" title="Resaltar Fila">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Resaltar</span>
+                </button>
+                <button onclick="deleteRow(${i})" class="table-action-btn bg-red-500 hover:bg-red-600 text-white" title="Eliminar Fila">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span>Eliminar</span>
+                </button>
+            </div>
         `;
         rowElement.appendChild(actionCell);
 
         DOM.routeTableBody.appendChild(rowElement);
     });
-    
-    DOM.googleMapsLink.classList.add('show');
-    DOM.lupapLink.classList.add('show');
 }
 
 /**
@@ -643,10 +650,7 @@ function processCSV(file) {
         complete: (results) => {
             csvHeaders = results.meta.fields;
             routeData = results.data.map((row, index) => {
-                // ======================================
-                // CAMBIO 4: CORRECCIÓN FSFB - Usar .trim() al cargar
-                // (Asigna el resaltado azul si es FSFB al cargar el CSV)
-                // ======================================
+                // CORRECCIÓN FSFB - Usar .trim() al cargar
                 const isFSFB = (row[COMPANIA_FIELD] || '').trim().toUpperCase().includes('FSFB');
                 
                 return {
@@ -696,6 +700,7 @@ function exportToPDF() {
         format: 'a4'
     });
 
+    // Se mantiene la misma estructura de columnas del PDF
     const tableColumn = [
         "N°", 
         "Orden Manual", 
@@ -708,12 +713,10 @@ function exportToPDF() {
         "Observaciones"
     ];
     const tableRows = [];
-    // INCLUSIÓN: Inicializar arrays para los estilos de color en el PDF
     const rowStyles = []; 
     const cellStyles = []; 
 
     routeData.forEach(item => {
-        // Combinar observaciones: seleccionada + manual (si existe)
         const combinedObs = [item.observaciones, item.observacionManual]
             .filter(text => text.trim() !== '')
             .join(' | ');
@@ -731,10 +734,11 @@ function exportToPDF() {
         ];
         tableRows.push(rowData);
         
-        // Color de Fondo de Fila (Orden Manual) - Utiliza PDF_HIGHLIGHT_COLORS actualizados
+        // Color de Fondo de Fila (Orden Manual)
         rowStyles.push(PDF_HIGHLIGHT_COLORS[item.manualHighlight] || [255, 255, 255]); 
 
         // Colores de Fondo de Celdas (Índice de columna)
+        // NOTA: Los índices de columna son los del PDF, no del HTML (Índice 0-8)
         cellStyles.push({
             6: PDF_CELL_HIGHLIGHT_COLORS[item.cellHighlightTipo], // Tipo Cliente (Índice 6)
             5: PDF_CELL_HIGHLIGHT_COLORS[item.cellHighlightSolicitud], // Solicitud (Índice 5)
@@ -753,7 +757,7 @@ function exportToPDF() {
             fontSize: 8, 
             cellPadding: 2, 
             overflow: 'linebreak',
-            valign: 'top' // Cambiado a top para mejor alineación en observaciones
+            valign: 'top' 
         },
         columnStyles: {
             0: { cellWidth: 8, halign: 'center' }, // N°
@@ -798,41 +802,6 @@ function exportToPDF() {
     DOM.loadingOverlay.classList.add('hidden');
     showMessage('Ruta exportada como PDF con éxito.', 'success');
 }
-
-/**
- * Crea el texto de la ruta para los enlaces de mapas (Google Maps y Lupap).
- */
-function createRouteText() {
-    if (routeData.length === 0) return '';
-
-    const addresses = routeData
-        .map(row => row[RAW_ADDRESS_FIELD].replace(/[\n\r]+/g, ' '))
-        .filter(addr => addr.trim() !== '');
-
-    return addresses.join('|');
-}
-
-/**
- * Actualiza los enlaces de mapas con la ruta actual.
- */
-function updateMapLinks() {
-    const routeText = createRouteText();
-    if (routeText) {
-        const encodedRoute = encodeURIComponent(routeText);
-        
-        DOM.googleMapsLink.href = `https://www.google.com/maps/search/?api=1&query=$${encodedRoute}`;
-        
-        DOM.lupapLink.href = `https://www.lupap.com.co/home/mapa-ruta?direccion=${encodedRoute.replace(/%7C/g, ',')}`;
-    } else {
-        DOM.googleMapsLink.classList.remove('show');
-        DOM.lupapLink.classList.remove('show');
-    }
-}
-
-
-// --------------------------------------
-// Funciones de Modal (Reemplazo de alert/confirm)
-// --------------------------------------
 
 /**
  * Muestra un modal de confirmación personalizado.
@@ -910,7 +879,7 @@ function init() {
         });
     });
     
-    // INCLUSIÓN: Evento para el botón de Volver al Portal
+    // Evento para el botón de Volver al Portal
     DOM.portalLinkBtn.addEventListener('click', () => {
         window.open('https://rmns82839-rgb.github.io/portal-de-toma-de-muestras/', '_self'); // '_self' para abrir en la misma pestaña
     });
