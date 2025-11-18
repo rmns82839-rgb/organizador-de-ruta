@@ -43,6 +43,9 @@ body {
     font-size: 0.75rem;
     border-radius: 0.375rem;
     line-height: 1;
+    display: inline-flex; /* Asegura que los botones se vean bien en la celda */
+    align-items: center;
+    justify-content: center;
 }
 
 /* --- Resaltado de Filas (Orden Manual) --- */
@@ -163,38 +166,6 @@ body {
 .msg-info { background-color: #e0f2fe; color: #075985; }
 .msg-warning { background-color: #fef9c3; color: #854d0e; }
 
-/* Estilos para enlaces de mapas flotantes (MEJORA DE VISIBILIDAD) */
-.floating-map-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.75rem 1rem; /* Aumentar el padding para que sea más grande */
-    border-radius: 9999px; /* full rounded */
-    color: white;
-    font-weight: 700; /* Más grueso */
-    /* Aumentar la sombra para destacarlos más */
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s, box-shadow 0.2s;
-    transform: scale(0);
-    opacity: 0;
-    /* CAMBIO: position: fixed para que se queden al hacer scroll y estén sobre todo */
-    position: fixed; 
-    bottom: 2rem; /* Más arriba */
-    right: 2rem;
-    z-index: 50;
-}
-.floating-map-link:hover {
-    transform: scale(1.05);
-    box-shadow: 0 15px 20px -5px rgba(0, 0, 0, 0.4);
-}
-.floating-map-link.show {
-    transform: scale(1);
-    opacity: 1;
-}
-#lupap-link {
-    right: 12rem; /* Separación del otro botón (Ajustado) */
-}
-
 /* Estilos específicos para la celda de dirección combinada en móvil */
 @media (max-width: 768px) {
     .table-action-btn span {
@@ -202,13 +173,6 @@ body {
     }
     .table-action-btn {
         padding: 0.25rem; /* Reduce el padding */
-    }
-    #lupap-link {
-        right: 4rem; /* Ajuste para móvil para que no se superpongan */
-        bottom: 1rem;
-    }
-    .floating-map-link {
-        bottom: 1rem;
-        right: 1rem;
+        line-height: 1.5;
     }
 }
