@@ -421,7 +421,7 @@ function renderRouteTable() {
         const encodedAddress = encodeURIComponent(rawAddress);
         
         // Enlaces de mapa individuales para esta parada
-        const googleMapsHref = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+        const googleMapsHref = `https://www.google.com/maps/search/?api=1&query=$${encodedAddress}`;
         const lupapMapsHref = `https://www.lupap.com.co/home/mapa-ruta?direccion=${encodedAddress.replace(/%20/g, '+')}`; 
 
         addressCell.innerHTML = `
@@ -640,6 +640,7 @@ function handleDragEnd() {
 
 /**
  * Procesa el archivo CSV cargado.
+ * 💡 MODIFICACIÓN: Llama a window.distributeParsedData después de procesar.
  */
 function processCSV(file) {
     DOM.loadingOverlay.classList.remove('hidden');
@@ -648,8 +649,11 @@ function processCSV(file) {
         header: true,
         skipEmptyLines: true,
         complete: (results) => {
+            const parsedData = results.data; // Capturamos los datos parseados
+            
+            // 1. Lógica de procesamiento local para esta aplicación (Rutas)
             csvHeaders = results.meta.fields;
-            routeData = results.data.map((row, index) => {
+            routeData = parsedData.map((row, index) => {
                 // CORRECCIÓN FSFB - Usar .trim() al cargar
                 const isFSFB = (row[COMPANIA_FIELD] || '').trim().toUpperCase().includes('FSFB');
                 
@@ -671,6 +675,13 @@ function processCSV(file) {
             calculateEstimatedTimes(0); 
             renderRouteTable();
             DOM.exportPdfBtn.disabled = false;
+            
+            // 2. >>> MODIFICACIÓN CLAVE: Distribución a otras aplicaciones <<<
+            if (typeof window.distributeParsedData === 'function') {
+                window.distributeParsedData(parsedData);
+            } else {
+                console.warn('Función global de distribución (window.distributeParsedData) no encontrada. La carga es solo local.');
+            }
             
             DOM.loadingOverlay.classList.add('hidden');
             showMessage(`Archivo CSV cargado exitosamente. ${routeData.length} pacientes encontrados.`, 'success');
